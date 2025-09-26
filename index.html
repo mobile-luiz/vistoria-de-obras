@@ -216,15 +216,15 @@
           <table id="tabelaPostes">
             <thead>
               <tr>
-                <th>Data</th>
-                <th>ID Projeto</th>
-                <th>PG</th>
-                <th>Poste Primário</th>
-                <th>Estrut. Primária</th>
-                <th>Poste Secundário</th>
-                <th>Estrut. Secundária</th>
-                <th>Linha Viva</th>
-                <th>Serviços Podas</th>
+                <th>Vistoria</th>
+                <th>Projeto</th>
+                <th>Referência elétrica</th>
+                <th>Acesso</th>
+                <th>Sinal telefônico</th>
+                <th>Braço</th>
+                <th>Sinal telefônico</th>
+                <th>Acesso caminhão/clima</th>
+                <th>Poda faixa</th>
                 <th>Observações</th>
             
                 <th>Lat</th>
@@ -817,12 +817,12 @@ if (temPodas) {
           <div style="font-size:13px">🔖 PG: ${p.codigoPoste || "-"}</div>
         </div>
         <div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:6px">
-          <div>📅 <b>Data:</b> ${p.dataLancamento || "-"}</div>
-          <div>🏗️ <b>Estrutura Primária:</b> ${p.estruturaPrimaria || "-"}</div>
-          <div>📍 <b>Poste Primário:</b> ${p.postePrimario || "-"}</div>
-          <div>🔗 <b>Poste Secundário:</b> ${p.posteSecundario || "-"}</div>
-          <div>⚙️ <b>Estrutura Secundária:</b> ${p.estruturaSecundaria || "-"}</div>
-          <div>⚡ <b>Linha Viva:</b> ${p.linhaViva || "-"}</div>
+          <div>📅 <b>Vistoria:</b> ${p.dataLancamento || "-"}</div>
+          <div>🏗️ <b>Sinal telefônico:</b> ${p.estruturaPrimaria || "-"}</div>
+          <div>📍 <b>Acesso:</b> ${p.postePrimario || "-"}</div>
+          <div>🔗 <b>Braço:</b> ${p.posteSecundario || "-"}</div>
+          <div>⚙️ <b>Modificação projeto:</b> ${p.estruturaSecundaria || "-"}</div>
+          <div>⚡ <b>Acesso caminhão/clima:</b> ${p.linhaViva || "-"}</div>
           ${p.servicosPodas?.trim() ? `<div>🌿 <b>Serv. Podas:</b> ${p.servicosPodas}</div>` : ""}
           <div>📝 <b>Obs.:</b> ${p.observacoes || "-"}</div>
           <div>📡 <b>Lat/Lon:</b> ${p.latitude || "-"}, ${p.longitude || "-"}</div>
