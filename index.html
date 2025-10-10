@@ -208,34 +208,52 @@
         <!-- Paginação -->
         <div id="paginacao"></div>
 
-        <!-- Tabela de Postes -->
-        <div class="scroll-table">
-          <table id="tabelaPostes">
-            <thead>
-              <tr>
-                <th>Vistoria</th>
-                <th>Projeto</th>
-                <th>Referência elétrica</th>
-                <th>Acesso</th>
-                <th>Sinal telefônico</th>
-                <th>Braço</th>
-                <th>Sinal telefônico</th>
-                <th>Acesso caminhão/clima</th>
-                <th>Poda faixa</th>
-                <th>Observações</th>
-            
-                <th>Lat</th>
-                <th>Lng</th>
-                <th>Usuário</th>
-                <th>Status</th>
-                
-                <th>Ações</th>
-                <th>Excluir</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
+ <div class="scroll-table">
+  <table id="tabelaPostes">
+    <thead>
+      <tr>
+        <th>Vistoria</th>
+        <th>Projeto</th>
+        <th>Referência elétrica</th>
+        <th>Acesso</th>
+        <th>Braço</th>
+        <th>Estrutura Secundária</th>
+        <th>Linha Viva</th>
+        <th>Poda faixa</th>
+      
+        <th>Observações</th>
+        <th>Apta Execução</th>
+        <th>Cava Rocha</th>
+        <th>LM</th>
+        <th>Retroescavadeira</th>
+        <th>Lat</th>
+        <th>Lng</th>
+        <th>Usuário</th>
+        <th>Vistoriador</th>
+        <th>CPF Morador</th>
+        <th>Fone Morador</th>
+        <th>Luminária</th>
+        <th>Fundação Especial</th>
+        <th>Guard Rail</th>
+        <th>Obra LPT</th>
+        <th>Monofásico</th>
+        <th>Bifásico</th>
+        <th>Trifásico</th>
+        <th>Desligamento</th>
+        <th>Qtd Ramais</th>
+       
+        <th>Tempo decorrido</th>
+        <th>Status</th>
+        <th>Ações</th>
+        <th>Excluir</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+
+
 
         <!-- Mapa dos Postes -->
         <h3 class="map-title">📍 Mapa dos Postes</h3>
@@ -501,8 +519,8 @@
         pagDiv.appendChild(btn);
       }
     }
- // ---------- Exibir Linhas na Tabela (agora inclui tempo decorrido) ----------
-  function exibirPostes(lista) {
+ // Função para exibir a lista de postes na tabela
+function exibirPostes(lista) {
   const tbody = document.querySelector("#tabelaPostes tbody");
   tbody.innerHTML = "";
 
@@ -513,235 +531,199 @@
       : "-";
 
     const tr = document.createElement("tr");
+    tr.dataset.id = p.id;
+
     tr.innerHTML = `
-      <td><span>${p.dataLancamento || ""}</span></td>
-      <td><input type="text" value="${p.idProjeto||""}" disabled></td>
-      <td><input type="text" value="${p.codigoPoste||""}" disabled></td>
-      <td><input type="text" value="${p.postePrimario||""}" disabled></td>
-      <td><input type="text" value="${p.estruturaPrimaria||""}" disabled></td>
-      <td><input type="text" value="${p.posteSecundario||""}" disabled></td>
-      <td><input type="text" value="${p.estruturaSecundaria||""}" disabled></td>
-      <td><textarea disabled>${p.linhaViva||""}</textarea></td>
-      <td><textarea disabled>${p.servicosPodas||""}</textarea></td>
-      <td><textarea disabled>${p.observacoes||""}</textarea></td>
-      <td><input type="text" value="${p.latitude||""}" readonly></td>
-      <td><input type="text" value="${p.longitude||""}" readonly></td>
-      <td><input type="text" value="${p.usuario||""}" readonly></td>
+      <td class="dataLancamento">${p.dataLancamento || ""}</td>
+      <td><input class="idProjeto" type="text" value="${p.idProjeto || ""}" disabled></td>
+      <td><input class="codigoPoste" type="text" value="${p.codigoPoste || ""}" disabled></td>
+      <td><input class="postePrimario" type="text" value="${p.postePrimario || ""}" disabled></td>
+      <td class="estruturaPrimaria">${p.estruturaPrimaria || ""}</td>
+      <td class="estruturaSecundaria">${p.estruturaSecundaria || ""}</td>
+      <td class="linhaViva">${p.linhaViva || ""}</td>
+      <td><textarea class="servicosPodas" disabled>${p.servicosPodas || ""}</textarea></td>
+      <td><textarea class="observacoes" disabled>${p.observacoes || ""}</textarea></td>
+      <td class="aptaExecucao">${p.aptaExecucao || ""}</td>
+      <td class="cavaRocha">${p.cavaRocha || ""}</td>
+      <td class="lm">${p.lm || ""}</td>
+      <td class="retroescavadeira">${p.retroescavadeira || ""}</td>
+      <td><input class="latitude" type="text" value="${p.latitude || ""}" disabled></td>
+      <td><input class="longitude" type="text" value="${p.longitude || ""}" disabled></td>
+      <td><input class="usuario" type="text" value="${p.usuario || ""}" disabled></td>
+      <td><input class="vistoriador" type="text" value="${p.vistoriador || ""}" disabled></td>
+      <td><input class="cpfMorador" type="text" value="${p.cpfMorador || ""}" disabled></td>
+      <td><input class="foneMorador" type="text" value="${p.foneMorador || ""}" disabled></td>
+      <td><input class="luminaria" type="text" value="${p.luminaria || ""}" disabled></td>
+      <td><input class="fundacaoEspecial" type="text" value="${p.fundacaoEspecial || ""}" disabled></td>
+      <td><input class="guardRail" type="text" value="${p.guardRail || ""}" disabled></td>
+      <td><input class="obraLPT" type="text" value="${p.obraLPT || ""}" disabled></td>
+      <td><input class="monofasico" type="text" value="${p.monofasico || ""}" disabled></td>
+      <td><input class="bifasico" type="text" value="${p.bifasico || ""}" disabled></td>
+      <td><input class="trifasico" type="text" value="${p.trifasico || ""}" disabled></td>
+      <td><input class="possuiDesligamento" type="text" value="${p.possuiDesligamento || ""}" disabled></td>
+      <td><input class="quantidadeRamais" type="text" value="${p.quantidadeRamais || ""}" disabled></td>
+      <td class="tempoDecorrido">${tempo}</td>
       <td>
-        <select disabled>
+        <select class="status" disabled>
           <option value="em andamento" ${status==="em andamento"? "selected":""}>Em andamento</option>
-          <option value="concluído"    ${status==="concluído"   ? "selected":""}>Concluído</option>
+          <option value="concluído" ${status==="concluído"? "selected":""}>Concluído</option>
         </select>
       </td>
-      
-      <td><button onclick="editar(this)">✏️</button></td>
-      <td><button class="delete-btn" onclick="excluir(this)">🗑️</button></td>
+      <td><button class="editar-btn">✏️</button></td>
+      <td><button class="delete-btn">🗑️</button></td>
     `;
-    tr.dataset.id = p.id;
+
+    // Eventos dos botões
+    tr.querySelector(".editar-btn").addEventListener("click", () => editar(tr));
+    tr.querySelector(".delete-btn").addEventListener("click", () => excluir(tr));
+
     tbody.appendChild(tr);
   });
 }
 
+// Função para editar um poste
+function editar(tr) {
+  tr.querySelectorAll("input, textarea, select").forEach(el => el.disabled = false);
+  const btn = tr.querySelector(".editar-btn");
+  btn.textContent = "💾";
+  btn.onclick = () => salvar(tr);
+}
 
-    // ---------- Editar / Salvar / Excluir ----------
-    function editar(botao) {
-      const tr = botao.closest("tr");
-      const salva = botao.textContent === "Salvar";
-      if (salva) {
-        salvar(tr);
-        botao.textContent = "✏️";
-        tr.querySelectorAll("input, textarea, select").forEach(el => {
-          if (el.tagName==="INPUT"||el.tagName==="TEXTAREA") {
-            el.disabled = true; el.readOnly = true;
-          } else {
-            el.disabled = true;
-          }
-        });
-      } else {
-        botao.textContent = "Salvar";
-        tr.querySelectorAll("input, textarea, select").forEach(el => {
-          const td = el.closest("td");
-          if (!td) return;
-          const colIndex = Array.from(tr.children).indexOf(td);
-          // colIndex 16 é a coluna de Status, 17 seria "Tempo em andamento" (somente exibição), 18 "Ações", 19 "Excluir".
-          // Bloquear edição na coluna 0 (Data) e na coluna 15 (Usuário).
-          const bloqueadas = [0, 15];
-          if (!bloqueadas.includes(colIndex)) {
-            if (el.tagName==="SELECT") {
-              el.disabled = false;
-            } else {
-              el.disabled = false;
-              el.readOnly = false;
-            }
-          }
-        });
-      }
-    }
+// Função para excluir um poste
+async function excluir(tr) {
+  if (!confirm("Tem certeza que deseja excluir este poste?")) return;
 
-    async function salvar(tr) {
-      const btnSalvar = tr.querySelector("button");
-      btnSalvar.disabled = true;
-      btnSalvar.textContent = "🔄";
+  const id = tr.dataset.id;
 
-      const id            = tr.dataset.id;
-      const dataLanc      = tr.children[0].innerText || "";
-      const idProj        = tr.children[1].querySelector("input").value.trim() || "";
-      const codPoste      = tr.children[2].querySelector("input").value.trim() || "";
-      const postePrimario = tr.children[3].querySelector("input").value.trim() || "";
-      const estrPrimaria  = tr.children[4].querySelector("input").value.trim() || "";
-      const posteSec      = tr.children[5].querySelector("input").value.trim() || "";
-      const estrSecund    = tr.children[6].querySelector("input").value.trim() || "";
-      const linhaViva     = tr.children[7].querySelector("textarea").value.trim() || "";
-      const servPodas     = tr.children[8].querySelector("textarea").value.trim() || "";
-      const obs           = tr.children[9].querySelector("textarea").value.trim() || "";
-      const foto1         = tr.children[10].querySelector("img")?.src || "";
-      const foto2         = tr.children[11].querySelector("img")?.src || "";
-      const foto3         = tr.children[12].querySelector("img")?.src || "";
-      const lat           = tr.children[13].querySelector("input").value.trim() || "";
-      const lng           = tr.children[14].querySelector("input").value.trim() || "";
-      const usuario       = tr.children[15].querySelector("input").value.trim() || "";
-      const status        = tr.children[16].querySelector("select")?.value || "";
+  try {
+    await db.ref(`postes/${id}`).remove();
+    tr.remove();
+    alert("✅ Poste excluído com sucesso!");
+  } catch (err) {
+    console.error(err);
+    alert(`❌ Falha ao excluir: ${err.message}`);
+  }
+}
 
-      try {
-        await db.ref(`postes/${id}`).update({
-          dataLancamento: dataLanc,
-          idProjeto:      idProj,
-          codigoPoste:    codPoste,
-          postePrimario,
-          estruturaPrimaria:   estrPrimaria,
-          posteSecundario:     posteSec,
-          estruturaSecundaria: estrSecund,
-          linhaViva,
-          servicosPodas: servPodas,
-          observacoes:   obs,
-          foto1,
-          foto2,
-          foto3,
-          latitude:      lat,
-          longitude:     lng,
-          usuario,
-          status
-        });
-        alert("✅ Poste atualizado com sucesso!");
-        filtrarPostes();
-      } catch (err) {
-        console.error(err);
-        alert(`❌ Falha ao salvar: ${err.message}`);
-      }
+// Função para salvar alterações de um poste
+async function salvar(tr) {
+  const btnSalvar = tr.querySelector(".editar-btn");
+  btnSalvar.disabled = true;
+  btnSalvar.textContent = "🔄";
 
-      btnSalvar.disabled = false;
-      btnSalvar.textContent = "✏️";
-    }
+  const id = tr.dataset.id;
 
-    async function excluir(botao) {
-      const tr = botao.closest("tr");
-      const id = tr.dataset.id;
-      if (!confirm("Deseja realmente excluir este poste?")) return;
-      botao.disabled = true;
-      botao.textContent = "...";
-      try {
-        await db.ref(`postes/${id}`).remove();
-        tr.remove();
-        alert("✅ Poste removido do Firebase!");
-        filtrarPostes();
-      } catch (err) {
-        console.error(err);
-        alert(`❌ Falha ao excluir: ${err.message}`);
-      }
-      botao.disabled = false;
-      botao.textContent = "🗑️";
-    }
+  const data = {
+    dataLancamento: tr.querySelector(".dataLancamento").innerText,
+    idProjeto: tr.querySelector(".idProjeto").value.trim(),
+    codigoPoste: tr.querySelector(".codigoPoste").value.trim(),
+    postePrimario: tr.querySelector(".postePrimario").value.trim(),
+    estruturaPrimaria: tr.querySelector(".estruturaPrimaria").innerText,
+    estruturaSecundaria: tr.querySelector(".estruturaSecundaria").innerText,
+    linhaViva: tr.querySelector(".linhaViva").innerText,
+    servicosPodas: tr.querySelector(".servicosPodas").value.trim(),
+    observacoes: tr.querySelector(".observacoes").value.trim(),
+    aptaExecucao: tr.querySelector(".aptaExecucao").innerText,
+    cavaRocha: tr.querySelector(".cavaRocha").innerText,
+    lm: tr.querySelector(".lm").innerText,
+    retroescavadeira: tr.querySelector(".retroescavadeira").innerText,
+    latitude: tr.querySelector(".latitude").value.trim(),
+    longitude: tr.querySelector(".longitude").value.trim(),
+    usuario: tr.querySelector(".usuario").value.trim(),
+    vistoriador: tr.querySelector(".vistoriador").value.trim(),
+    cpfMorador: tr.querySelector(".cpfMorador").value.trim(),
+    foneMorador: tr.querySelector(".foneMorador").value.trim(),
+    luminaria: tr.querySelector(".luminaria").value.trim(),
+    fundacaoEspecial: tr.querySelector(".fundacaoEspecial").value.trim(),
+    guardRail: tr.querySelector(".guardRail").value.trim(),
+    obraLPT: tr.querySelector(".obraLPT").value.trim(),
+    monofasico: tr.querySelector(".monofasico").value.trim(),
+    bifasico: tr.querySelector(".bifasico").value.trim(),
+    trifasico: tr.querySelector(".trifasico").value.trim(),
+    possuiDesligamento: tr.querySelector(".possuiDesligamento").value.trim(),
+    quantidadeRamais: tr.querySelector(".quantidadeRamais").value.trim(),
+    status: tr.querySelector(".status").value
+  };
 
-     // ---------- Sumários de Podas e Linha Viva ----------
-function somarValor(labelField, statusField, lista) {
-  let total = 0;
-  lista.forEach(p => {
-    const textoOriginal = (p[labelField] || "").trim().toLowerCase();
-    const stat = (p[statusField] || "").trim().toLowerCase();
-
-    const textoLimpo = textoOriginal.replace(/\s+/g, " ").replace(/\n/g, " ").trim();
-
-    // Ignora valores inválidos
-    if (
-      !textoLimpo || 
-      textoLimpo === "não recebido" || 
-      textoLimpo === "selecione os serviços" || 
-      stat === "concluído"
-    ) return;
-
-    const matches = textoLimpo.match(/r\$ ?[\d.,]+/gi);
-    if (matches) {
-      matches.forEach(val => {
-        const num = parseFloat(val.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
-        total += num;
-      });
-    }
-  });
-  return total;
+  try {
+    await db.ref(`postes/${id}`).update(data);
+    alert("✅ Poste atualizado com sucesso!");
+    tr.querySelectorAll("input, textarea, select").forEach(el => el.disabled = true);
+    btnSalvar.textContent = "✏️";
+    btnSalvar.onclick = () => editar(tr);
+  } catch (err) {
+    console.error(err);
+    alert(`❌ Falha ao salvar: ${err.message}`);
+    btnSalvar.disabled = false;
+    btnSalvar.textContent = "💾";
+  }
 }
 
 
 
-  function atualizarContadorStatus() {
+function atualizarContadorStatus() {
+  if (!Array.isArray(todosOsPostes) || todosOsPostes.length === 0) {
+    console.warn("A lista de postes está vazia ou indefinida.");
+    return;
+  }
+
+  // ----- Funções auxiliares internas -----
+  function contarSimNao(campo, lista) {
+    let sim = 0, nao = 0;
+    lista.forEach(p => {
+      if (p[campo] && p[campo].toString().trim() !== "") sim++;
+      else nao++;
+    });
+    return { sim, nao };
+  }
+
+  function normalizarTexto(texto) {
+    return (texto || "").toLowerCase().trim();
+  }
+
   const lista = todosOsPostes;
 
-  const totalProj   = new Set(lista.map(p => (p.idProjeto || "").trim()).filter(x => x !== "")).size;
+  // ----- Contagem Sim/Não -----
+  const braco = contarSimNao("estruturaPrimaria", lista);
+  const estrSec = contarSimNao("posteSecundario", lista);
+  const lv = contarSimNao("linhaViva", lista);
+  const poda = contarSimNao("servicosPodas", lista);
+
+  // ----- Totais gerais -----
+  const totalProj = new Set(lista.map(p => (p.idProjeto || "").trim()).filter(x => x !== "")).size;
   const totalPostes = lista.length;
- const concluidos  = lista.filter(p => normalizarTexto(p.status) === "concluído").length;
-const andamento   = lista.filter(p => {
-  const s = normalizarTexto(p.status);
-  // conta como andamento se estiver em branco ou marcado como "em andamento"
-  return s === "" || s === "em andamento";
-}).length;
 
-
-  // 🧠 Apenas contam Podas ou Linha Viva se tiverem valor R$
-  const regexValor = /r\$ ?[\d.,]+/i;
-
-  const comPodas = lista.filter(p => {
-    const txt = (p.servicosPodas || "").toLowerCase().replace(/\n/g, " ");
-    return regexValor.test(txt);
+  const concluidos = lista.filter(p => normalizarTexto(p.status) === "concluído").length;
+  const andamento = lista.filter(p => {
+    const s = normalizarTexto(p.status);
+    return s === "" || s === "em andamento";
   }).length;
 
-  const podasPend = lista.filter(p => {
-    const txt = (p.servicosPodas || "").toLowerCase().replace(/\n/g, " ");
-    const status = normalizarTexto(p.status);
-    return regexValor.test(txt) && status !== "concluído";
-  }).length;
-
-  const comLV = lista.filter(p => {
-    const txt = (p.linhaViva || "").toLowerCase().replace(/\n/g, " ");
-    return regexValor.test(txt);
-  }).length;
-
-  const lvPend = lista.filter(p => {
-    const txt = (p.linhaViva || "").toLowerCase().replace(/\n/g, " ");
-    const status = normalizarTexto(p.status);
-    return regexValor.test(txt) && status !== "concluído";
-  }).length;
-
-  const totalPodas = somarValor("servicosPodas", "status", lista);
-  const totalLV = somarValor("linhaViva", "status", lista);
-
-  const totalPodasf = totalPodas > 0 ? totalPodas.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : null;
-  const totalLVf    = totalLV > 0 ? totalLV.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : null;
+  // ----- Monta a mensagem -----
+  let msg = `📚 ${totalProj} projetos | 🔢 ${totalPostes} postes | ✅ ${concluidos} concluídos | 🛠 ${andamento} em andamento`;
+  msg += ` | Braço: Sim ${braco.sim} | Não ${braco.nao}`;
+  msg += ` | Linha Viva: Sim ${lv.sim} | Não ${lv.nao}`;
+  msg += ` | Poda faixa: Sim ${poda.sim} | Não ${poda.nao}`;
 
   const agora = new Date();
   const horaAtual = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const dataAtual = agora.toLocaleDateString("pt-BR");
-
-  let msg =
-    `📚 ${totalProj} projetos | 🔢 ${totalPostes} postes | ✅ ${concluidos} concluídos | ` +
-    `🛠 ${andamento} em andamento | 🌿 ${comPodas} com poda | 🕳️ ${podasPend} podas pendentes | ` +
-    `⚡ ${comLV} com linha viva | ⏳ ${lvPend} linha viva pendente`;
-
-  if (totalPodasf) msg += ` | 💰 Total Podas: ${totalPodasf}`;
-  if (totalLVf)    msg += ` | 💰 Total LV: ${totalLVf}`;
-
   msg += ` | 🕒 Atualizado em: ${dataAtual} às ${horaAtual}`;
 
-  document.getElementById("contadorStatus").innerText = msg;
+  // ----- Exibe no HTML -----
+  const contador = document.getElementById("contadorStatus");
+  if (contador) {
+    contador.innerText = msg;
+  } else {
+    console.warn("Elemento com ID 'contadorStatus' não encontrado no HTML.");
+  }
 }
+
+// ----- Exemplo de chamada automática -----
+atualizarContadorStatus();
+
+
+
 
 
     // ---------- Mostrar Mapa com Markers ----------
@@ -807,43 +789,42 @@ if (temPodas) {
 }
 
 
-    let infoContent = `
-      <div style="max-width:250px;font-family:Roboto,sans-serif;font-size:12px;color:#333">
-        <div style="background:#004d40;color:#fff;padding:12px 16px">
-          <div style="font-size:16px;font-weight:600">📁 Projeto: ${p.idProjeto || "N/A"}</div>
-          <div style="font-size:13px">🔖 PG: ${p.codigoPoste || "-"}</div>
-        </div>
-        <div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:6px">
-          <div>📅 <b>Vistoria:</b> ${p.dataLancamento || "-"}</div>
-          <div>🏗️ <b>Sinal telefônico:</b> ${p.estruturaPrimaria || "-"}</div>
-          <div>📍 <b>Acesso:</b> ${p.postePrimario || "-"}</div>
-          <div>🔗 <b>Braço:</b> ${p.posteSecundario || "-"}</div>
-          <div>⚙️ <b>Modificação projeto:</b> ${p.estruturaSecundaria || "-"}</div>
-          <div>⚡ <b>Acesso caminhão/clima:</b> ${p.linhaViva || "-"}</div>
-          ${p.servicosPodas?.trim() ? `<div>🌿 <b>Serv. Podas:</b> ${p.servicosPodas}</div>` : ""}
-          <div>📝 <b>Obs.:</b> ${p.observacoes || "-"}</div>
-          <div>📡 <b>Lat/Lon:</b> ${p.latitude || "-"}, ${p.longitude || "-"}</div>
-          <div>🟢 <b>Status:</b> <span style="color:${status === "concluído" ? "#2e7d32" : "#ff9800"}">${p.status || "Em andamento"}</span></div>
-          <div>👤 <b>Usuário:</b> ${p.usuario || "-"}</div>
-          <div id="muni-${p.id}" style="display:none; margin-top:4px">
-            🗺️ <b>Município:</b> <span id="muni-text-${p.id}">Carregando...</span>
-          </div>
-        </div>
-        ${
-          (p.foto1 || p.foto2 || p.foto3)
-            ? `<div style="padding:8px 14px;border-top:1px solid #eee;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-                ${p.foto1 ? `<a href="${p.foto1}" target="_blank"><img src="${p.foto1}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;border:1px solid #ccc" onerror="this.src='no-image.png'"></a>` : ""}
-                ${p.foto2 ? `<a href="${p.foto2}" target="_blank"><img src="${p.foto2}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;border:1px solid #ccc" onerror="this.src='no-image.png'"></a>` : ""}
-                ${p.foto3 ? `<a href="${p.foto3}" target="_blank"><img src="${p.foto3}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;border:1px solid #ccc" onerror="this.src='no-image.png'"></a>` : ""}
-              </div>
-              <div style="padding:10px 14px;text-align:center">
-                <button onclick="abrirTabelaCompleta('${p.foto1}','${p.foto2}','${p.foto3}')" 
-                  style="background:#1976d2;color:#fff;border:none;padding:6px 10px;font-size:12px;font-weight:bold;border-radius:4px;cursor:pointer">
-                  🔍 Ver Fotos
-                </button>
-              </div>` : ""
-        }
-      </div>`;
+  let infoContent = `
+<div style="max-width:270px;font-family:Roboto,sans-serif;font-size:12px;color:#333">
+  <div style="background:#004d40;color:#fff;padding:12px 16px">
+    <div style="font-size:16px;font-weight:600">📁 Projeto: ${p.idProjeto || "N/A"}</div>
+    <div style="font-size:13px">🔖 PG: ${p.codigoPoste || "-"}</div>
+  </div>
+  <div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:6px">
+    <div>📅 <b>Vistoria:</b> ${p.dataLancamento || "-"}</div>
+    <div>🏗️ <b>Estrutura Primária:</b> ${p.estruturaPrimaria || "-"}</div>
+    <div>⚙️ <b>Estrutura Secundária:</b> ${p.estruturaSecundaria || "-"}</div>
+    <div>📍 <b>Poste Primário:</b> ${p.postePrimario || "-"}</div>
+    <div>🔗 <b>Poste Secundário:</b> ${p.posteSecundario || "-"}</div>
+    <div>⚡ <b>Linha Viva:</b> ${p.linhaViva || "-"}</div>
+    <div>💡 <b>Monofásico:</b> ${p.monofasico || "-"}</div>
+    <div>💡 <b>Bifásico:</b> ${p.bifasico || "-"}</div>
+    <div>💡 <b>Trifásico:</b> ${p.trifasico || "-"}</div>
+    <div>🌳 <b>Serv. Podas:</b> ${p.servicosPodas || "N/A"}</div>
+    <div>🚜 <b>Retroescavadeira:</b> ${p.retroescavadeira || "N/A"}</div>
+    <div>🛠️ <b>Fundação Especial:</b> ${p.fundacaoEspecial || "N/A"}</div>
+    <div>🛡️ <b>Guard Rail:</b> ${p.guardRail || "N/A"}</div>
+    <div>🔌 <b>Desligamento:</b> ${p.possuiDesligamento || "N/A"}</div>
+    <div>🖇️ <b>Quantidade Ramais:</b> ${p.quantidadeRamais || "-"}</div>
+    <div>📌 <b>Ramal Selecionado:</b> ${p.ramaisSelecionados || "-"}</div>
+    <div>🏠 <b>CPF Morador:</b> ${p.cpfMorador || "-"}</div>
+    <div>📞 <b>Fone Morador:</b> ${p.foneMorador || "-"}</div>
+    <div>🏗️ <b>Luminária:</b> ${p.luminaria || "-"}</div>
+    <div>🗂️ <b>Código Poste Antigo:</b> ${p.codigoPosteAntigo || "-"}</div>
+    <div>🗂️ <b>ID Projeto Antigo:</b> ${p.idProjetoAntigo || "-"}</div>
+    <div>🏘️ <b>Obra LPT:</b> ${p.obraLPT || "N/A"}</div>
+    <div>📡 <b>Lat/Lon:</b> ${p.latitude || "-"}, ${p.longitude || "-"}</div>
+    <div>📝 <b>Obs.:</b> ${p.observacoes || "-"}</div>
+    <div>👤 <b>Usuário:</b> ${p.usuario || "-"}</div>
+    <div>🕵️ <b>Vistoriador:</b> ${p.vistoriador || "-"}</div>
+    <div>🟢 <b>Status:</b> <span style="color:${status === "concluído" ? "#2e7d32" : "#ff9800"}">${p.status || "Em andamento"}</span></div>
+  </div>
+</div>`;
 
     const infoWindow = new google.maps.InfoWindow({ content: infoContent });
     marcadorPoste.addListener("click", () => infoWindow.open(map, marcadorPoste));
