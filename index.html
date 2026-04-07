@@ -92,7 +92,6 @@
                 <div class="acoes">
                     <button id="btnPowerBI" onclick="togglePowerBI()">📊 Power BI</button>
                     <button id="btnMostrarPodas" onclick="togglePodas()">🌿 Mostrar Podas</button>
-                    
                 </div>
                 
                 <div id="contadorStatus"></div>
@@ -153,8 +152,8 @@
                     </div>
                 </div>
                 <div id="map" class="mapa-container"></div> 
-                </div>
             </div>
+        </div>
         <div id="powerbiContainer" style="display: none; width: 100%; height: 80vh; position: relative;">
             <button
                 onclick="togglePowerBI()"
@@ -164,664 +163,608 @@
             >
                 ← Voltar ao Painel
             </button>
-    </button>
 
-   <iframe
-  title="Atbuilt atual"
-  width="100%"
-  height="100%"
-  src="https://app.powerbi.com/view?r=eyJrIjoiNDcwY2RlNDUtYjA1Ni00OTUzLTkyNzUtNGM2YWI3ZjdlOTM4IiwidCI6ImMyNGEyNGRjLWJjYTAtNGYyYS1hOTRmLWY3NDVkNDdkZTE4MCJ9"
-  frameborder="0"
-  allowFullScreen="true"
-  style="border: none;"
-></iframe>
+            <iframe
+                title="Atbuilt atual"
+                width="100%"
+                height="100%"
+                src="https://app.powerbi.com/view?r=eyJrIjoiNDcwY2RlNDUtYjA1Ni00OTUzLTkyNzUtNGM2YWI3ZjdlOTM4IiwidCI6ImMyNGEyNGRjLWJjYTAtNGYyYS1hOTRmLWY3NDVkNDdkZTE4MCJ9"
+                frameborder="0"
+                allowFullScreen="true"
+                style="border: none;"
+            ></iframe>
+        </div>
     </div>
-    <!-- fim #powerbiContainer -->
-  </div>
-  <!-- fim #sistemaContainer -->
 
-  <!-- initMap para Google Maps -->
-  <script>
-    function initMap() {
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -8.0, lng: -35.0 },
-        zoom: 6,
-        gestureHandling: "greedy",
-        zoomControl: true,
-        mapTypeControl: true,
-        streetViewControl: false,
-        fullscreenControl: true,
-      });
-    }
-  </script>
- 
- 
-  <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNfO72QTnIMEn2g743sO_5UR5o-2KmEig&callback=initMap"
-    async defer>
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/google-maps-utility-library-v3-infobox@latest/infobox.min.js"></script>
+    <!-- initMap para Google Maps -->
+    <script>
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: -8.0, lng: -35.0 },
+                zoom: 6,
+                gestureHandling: "greedy",
+                zoomControl: true,
+                mapTypeControl: true,
+                streetViewControl: false,
+                fullscreenControl: true,
+            });
+        }
+    </script>
 
-<script>
-    // ---------- Inicialização Firebase ----------
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZEXr0laF1lT2_99m-c9esufO3Mpl5mXg",
-      databaseURL: "https://vistoria-obras-default-rtdb.firebaseio.com",
-      // ... outras configurações
-    };
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDNfO72QTnIMEn2g743sO_5UR5o-2KmEig&callback=initMap"
+        async defer>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/google-maps-utility-library-v3-infobox@latest/infobox.min.js"></script>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+    <script>
+        // ---------- Inicialização Firebase ----------
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZEXr0laF1lT2_99m-c9esufO3Mpl5mXg",
+            databaseURL: "https://vistoria-obras-default-rtdb.firebaseio.com",
+        };
 
-    let todosOsPostes = [];
-    let listaVisivel = [];
-    let paginaAtual = 1;
-    const itensPorPagina = 100;
-    let map;
-    let markers = [];
-    // VARIÁVEL DE LINHA VIVA REMOVIDA
-    let mostrandoSomentePodas = false; 
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-    // ---------- Calcular Tempo Decorrido (dias e horas) ----------
-    function calcularTempoDecorrido(dataLancStr) {
-      if (!dataLancStr) return null;
-      // Se dataLancStr estiver no formato "DD/MM/YYYY HH:mm:ss":
-      const partes = dataLancStr.split(/[\s/:]+/).map(Number);
-      const dataLanc = new Date(partes[2], partes[1] - 1, partes[0], partes[3], partes[4], partes[5] || 0);
-      const agora = new Date();
-      const diffMs = agora - dataLanc;
-      if (isNaN(diffMs) || diffMs < 0) return null;
-      const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      const horas = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      return { dias, horas };
-    }
+        let todosOsPostes = [];
+        let listaVisivel = [];
+        let paginaAtual = 1;
+        const itensPorPagina = 100;
+        let map;
+        let markers = [];
+        let mostrandoSomentePodas = false;
 
-    // ---------- Função de Login ----------
-    function fazerLogin() {
-      const email = document.getElementById("loginEmail").value.trim();
-      const senha = document.getElementById("loginSenha").value.trim();
-      if (!email || !senha) {
-        document.getElementById("loginErro").innerText = "Por favor, preencha e-mail e senha.";
-        return;
-      }
-      auth.signInWithEmailAndPassword(email, senha)
-        .then(() => {
-          document.getElementById("loginContainer").style.display = "none";
-          document.getElementById("sistemaContainer").style.display = "block";
-          carregarPostes();
-        })
-        .catch(err => {
-          document.getElementById("loginErro").innerText = `Erro: ${err.message}`;
-        });
-    }
+        // ========== FUNÇÃO PARA REMOVER DUPLICATAS ==========
+        function removerPostesDuplicados(listaDePostes) {
+            const registrosUnicos = new Map();
+            let duplicatasEncontradas = 0;
 
-    function gerarRelatorioSintetico() {
-      window.location.href = "relatorios.html";
-    }
+            listaDePostes.forEach(poste => {
+                // Cria chave única baseada no Projeto + Código do Poste
+                const chaveUnica = `${normalizarTexto(poste.idProjeto)}|${normalizarTexto(poste.codigoPoste)}`;
+                
+                if (!registrosUnicos.has(chaveUnica)) {
+                    // Primeira ocorrência - mantém
+                    registrosUnicos.set(chaveUnica, poste);
+                } else {
+                    // Duplicata encontrada - verifica se este é mais recente
+                    duplicatasEncontradas++;
+                    const existente = registrosUnicos.get(chaveUnica);
+                    const dataAtual = poste._dataConvertida || 0;
+                    const dataExistente = existente._dataConvertida || 0;
+                    
+                    // Mantém o registro mais recente (com data de lançamento mais nova)
+                    if (dataAtual > dataExistente) {
+                        registrosUnicos.set(chaveUnica, poste);
+                    }
+                }
+            });
 
-    // ---------- Formatação de Data (DD/MM/YYYY HH:mm:ss) ----------
-    function formatarDataBR(dataStr) {
-      if (!dataStr) return "";
-      if (/\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}/.test(dataStr)) {
-        return dataStr;
-      }
-      const dt = new Date(dataStr);
-      if (isNaN(dt)) return dataStr;
-      const pad = n => String(n).padStart(2, "0");
-      return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ` +
-                            `${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
-    }
+            console.log(`🗑️ Duplicatas removidas: ${duplicatasEncontradas}`);
+            return Array.from(registrosUnicos.values());
+        }
 
-    // ---------- Carregar Postes do Firebase ----------
-    function carregarPostes() {
-      db.ref("postes").off("value");
-      db.ref("postes").on("value", snapshot => {
-        const obj = snapshot.val() || {};
-        const lista = Object.entries(obj)
-          .filter(([, v]) => v !== null)
-          .map(([id, data]) => {
-            // converter dataLancamento de string para Date (campo _dataConvertida)
-            if (data.dataLancamento && typeof data.dataLancamento === "string") {
-              const partes = data.dataLancamento.split(/[\s/:]+/).map(Number);
-              if (partes.length >= 5) {
-                data._dataConvertida = new Date(partes[2], partes[1]-1, partes[0], partes[3], partes[4], partes[5]||0);
-              } else {
-                data._dataConvertida = null;
-              }
+        // Função para contar duplicatas ocultas (exibe no contador)
+        function contarDuplicatasOcultas() {
+            const mapaContagem = new Map();
+            
+            // Conta ocorrências de cada combinação Projeto + Código
+            todosOsPostes.forEach(poste => {
+                const chave = `${normalizarTexto(poste.idProjeto)}|${normalizarTexto(poste.codigoPoste)}`;
+                mapaContagem.set(chave, (mapaContagem.get(chave) || 0) + 1);
+            });
+            
+            // Soma quantas duplicatas existem (total - 1 por grupo)
+            let totalDuplicatas = 0;
+            for (let count of mapaContagem.values()) {
+                if (count > 1) {
+                    totalDuplicatas += (count - 1);
+                }
             }
-            return { id, ...data };
-          });
-        // ordena do mais recente para o mais antigo
-        lista.sort((a, b) => (b._dataConvertida || 0) - (a._dataConvertida || 0));
-        todosOsPostes = lista;
-        paginaAtual = 1;
-        filtrarPostes();
-      });
-    }
-
-    // ---------- Normalização de Texto ----------
-    function normalizarTexto(txt) {
-      return (txt || "").toString().trim().toLowerCase();
-    }
-
-    // ---------- Filtrar + Calcular Tempo + Paginar + Exibir (Lógica de Poda Adicionada) ----------
-    function filtrarPostes() {
-      const filtroProjeto = normalizarTexto(document.getElementById("filtroProjeto")?.value);
-      const filtroPoste   = normalizarTexto(document.getElementById("filtroPoste")?.value);
-      const filtroUsuario = normalizarTexto(document.getElementById("usuario")?.value);
-      const filtroStatus  = normalizarTexto(document.getElementById("filtroStatus")?.value);
-      const dataInicial   = document.getElementById("dataInicial").value;
-      const dataFinal     = document.getElementById("dataFinal").value;
-
-      // Filtrar
-      let listaFiltrada = todosOsPostes.filter(p => {
-        const data = p._dataConvertida;
-        // projeto: agora usamos includes()
-        const okProjeto = !filtroProjeto ||
-                                normalizarTexto(p.idProjeto).includes(filtroProjeto);
-        // poste: includes()
-        const okPoste   = !filtroPoste ||
-                                normalizarTexto(p.codigoPoste).includes(filtroPoste);
-        const okUsuario = !filtroUsuario ||
-                                normalizarTexto(p.usuario).includes(filtroUsuario);
-        const statusNorm = normalizarTexto(p.status);
-        const okStatus = !filtroStatus ||
-        (filtroStatus === "em andamento"
-        ? (statusNorm === "" || statusNorm === "em andamento")
-        : statusNorm === filtroStatus);
-
-        let okData = true;
-        if (dataInicial) {
-          const dtIni = new Date(`${dataInicial}T00:00:00`);
-          okData = data instanceof Date && data >= dtIni;
+            
+            return totalDuplicatas;
         }
-        if (okData && dataFinal) {
-          const dtFim = new Date(`${dataFinal}T23:59:59`);
-          okData = data instanceof Date && data <= dtFim;
+
+        // ---------- Calcular Tempo Decorrido (dias e horas) ----------
+        function calcularTempoDecorrido(dataLancStr) {
+            if (!dataLancStr) return null;
+            const partes = dataLancStr.split(/[\s/:]+/).map(Number);
+            const dataLanc = new Date(partes[2], partes[1] - 1, partes[0], partes[3], partes[4], partes[5] || 0);
+            const agora = new Date();
+            const diffMs = agora - dataLanc;
+            if (isNaN(diffMs) || diffMs < 0) return null;
+            const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            return { dias, horas };
         }
-        
-        // FILTRO DE PODA: Adiciona a condição para filtrar SÓMENTE postes com servicosPodas="sim"
-        const podasNorm = normalizarTexto(p.servicosPodas);
-        const okPodas = !mostrandoSomentePodas || podasNorm === "sim";
-        
-        // Retorno: Combina todos os filtros, incluindo o de Poda
-        return okProjeto && okPoste && okUsuario && okStatus && okData && okPodas;
-      });
 
-      // recalculação de tempo decorrido
-      listaFiltrada.forEach(p => {
-        if ((p.status || "").toLowerCase() === "em andamento") {
-          p.tempoDecorrido = calcularTempoDecorrido(p.dataLancamento || "");
-        } else {
-          p.tempoDecorrido = null;
+        // ---------- Função de Login ----------
+        function fazerLogin() {
+            const email = document.getElementById("loginEmail").value.trim();
+            const senha = document.getElementById("loginSenha").value.trim();
+            if (!email || !senha) {
+                document.getElementById("loginErro").innerText = "Por favor, preencha e-mail e senha.";
+                return;
+            }
+            auth.signInWithEmailAndPassword(email, senha)
+                .then(() => {
+                    document.getElementById("loginContainer").style.display = "none";
+                    document.getElementById("sistemaContainer").style.display = "block";
+                    carregarPostes();
+                })
+                .catch(err => {
+                    document.getElementById("loginErro").innerText = `Erro: ${err.message}`;
+                });
         }
-      });
 
-      // ordenar do mais recente para mais antigo
-      listaFiltrada.sort((a, b) => (b._dataConvertida || 0) - (a._dataConvertida || 0));
-
-      // paginar
-      const totalPaginas = Math.ceil(listaFiltrada.length / itensPorPagina);
-      const inicio = (paginaAtual - 1) * itensPorPagina;
-      const fim    = inicio + itensPorPagina;
-      listaVisivel = listaFiltrada.slice(inicio, fim);
-
-      exibirPostes(listaVisivel);
-      mostrarMapa(listaVisivel);
-      atualizarPaginacao(totalPaginas);
-      atualizarContadorStatus();
-    }
-
-   // ---------- Atualizar Paginação (MODERNA) ----------
-    function atualizarPaginacao(totalPaginas) {
-      const pagDiv = document.getElementById("paginacao");
-      pagDiv.innerHTML = "";
-
-      if (totalPaginas <= 1) {
-          // Não mostra a paginação se houver apenas uma página
-          return;
-      }
-
-      const maxBotoes = 5; // Número máximo de botões de página para exibir
-      let startPage = Math.max(1, paginaAtual - Math.floor(maxBotoes / 2));
-      let endPage = Math.min(totalPaginas, startPage + maxBotoes - 1);
-
-      if (endPage - startPage + 1 < maxBotoes) {
-          startPage = Math.max(1, endPage - maxBotoes + 1);
-      }
-      
-      // ------------------------------------
-      // 1. Botão ANTERIOR
-      // ------------------------------------
-      const btnAnterior = document.createElement("button");
-      btnAnterior.textContent = "« Anterior";
-      btnAnterior.disabled = paginaAtual === 1;
-      btnAnterior.classList.add("pagination-btn");
-      btnAnterior.onclick = () => {
-          paginaAtual = Math.max(1, paginaAtual - 1);
-          filtrarPostes();
-      };
-      pagDiv.appendChild(btnAnterior);
-
-      // ------------------------------------
-      // 2. Botões Numéricos
-      // ------------------------------------
-      for (let i = startPage; i <= endPage; i++) {
-          const btn = document.createElement("button");
-          btn.textContent = i;
-          btn.disabled = i === paginaAtual;
-          btn.classList.add("pagination-page-btn");
-          if (i === paginaAtual) {
-              btn.classList.add("active");
-          }
-          btn.onclick = () => {
-              paginaAtual = i;
-              filtrarPostes();
-          };
-          pagDiv.appendChild(btn);
-      }
-
-      // ------------------------------------
-      // 3. Indicador de Status (Página X de Y)
-      // ------------------------------------
-      const spanStatus = document.createElement("span");
-      spanStatus.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-      spanStatus.style.margin = "0 10px";
-      spanStatus.style.fontWeight = "bold";
-      pagDiv.appendChild(spanStatus);
-      
-      // ------------------------------------
-      // 4. Botão PRÓXIMA
-      // ------------------------------------
-      const btnProxima = document.createElement("button");
-      btnProxima.textContent = "Próxima »";
-      btnProxima.disabled = paginaAtual === totalPaginas;
-      btnProxima.classList.add("pagination-btn");
-      btnProxima.onclick = () => {
-          paginaAtual = Math.min(totalPaginas, paginaAtual + 1);
-          filtrarPostes();
-      };
-      pagDiv.appendChild(btnProxima);
-    }
-
-    // Função para exibir a lista de postes na tabela (RESTURADA E CORRIGIDA)
-    function exibirPostes(lista) {
-      const tbody = document.querySelector("#tabelaPostes tbody");
-      tbody.innerHTML = "";
-
-      lista.forEach(p => {
-        const status = normalizarTexto(p.status || "em andamento");
-        const tempo = p.tempoDecorrido
-          ? `${p.tempoDecorrido.dias}d ${p.tempoDecorrido.horas}h`
-          : "-";
-
-        const tr = document.createElement("tr");
-        tr.dataset.id = p.id;
-        
-        // Estrutura do TR restaurada para refletir exatamente o cabeçalho original.
-        tr.innerHTML = `
-          <td class="dataLancamento">${p.dataLancamento || ""}</td>
-          <td><input class="idProjeto" type="text" value="${p.idProjeto || ""}" disabled></td>
-          <td><input class="codigoPoste" type="text" value="${p.codigoPoste || ""}" disabled></td>
-          <td><input class="postePrimario" type="text" value="${p.postePrimario || ""}" disabled></td>
-          <td class="estruturaPrimaria">${p.estruturaPrimaria || ""}</td>
-          <td class="estruturaSecundaria">${p.estruturaSecundaria || ""}</td>
-          <td class="linhaViva">${p.linhaViva || ""}</td>
-          <td><textarea class="servicosPodas" disabled>${p.servicosPodas || ""}</textarea></td>
-          <td><textarea class="observacoes" disabled>${p.observacoes || ""}</textarea></td>
-          <td class="aptaExecucao">${p.aptaExecucao || ""}</td>
-          <td class="cavaRocha">${p.cavaRocha || ""}</td>
-          <td class="lm">${p.lm || ""}</td>
-          <td class="retroescavadeira">${p.retroescavadeira || ""}</td>
-          <td><input class="latitude" type="text" value="${p.latitude || ""}" disabled></td>
-          <td><input class="longitude" type="text" value="${p.longitude || ""}" disabled></td>
-          <td><input class="usuario" type="text" value="${p.usuario || ""}" disabled></td>
-          <td><input class="vistoriador" type="text" value="${p.vistoriador || ""}" disabled></td>
-          <td><input class="cpfMorador" type="text" value="${p.cpfMorador || ""}" disabled></td>
-          <td><input class="foneMorador" type="text" value="${p.foneMorador || ""}" disabled></td>
-          <td><input class="luminaria" type="text" value="${p.luminaria || ""}" disabled></td>
-          <td><input class="fundacaoEspecial" type="text" value="${p.fundacaoEspecial || ""}" disabled></td>
-          <td><input class="guardRail" type="text" value="${p.guardRail || ""}" disabled></td>
-          <td><input class="obraLPT" type="text" value="${p.obraLPT || ""}" disabled></td>
-          <td><input class="monofasico" type="text" value="${p.monofasico || ""}" disabled></td>
-          <td><input class="bifasico" type="text" value="${p.bifasico || ""}" disabled></td>
-          <td><input class="trifasico" type="text" value="${p.trifasico || ""}" disabled></td>
-          <td><input class="possuiDesligamento" type="text" value="${p.possuiDesligamento || ""}" disabled></td>
-          <td><input class="quantidadeRamais" type="text" value="${p.quantidadeRamais || ""}" disabled></td>
-          <td class="tempoDecorrido"><span>${tempo}</span></td>
-          <td>
-            <select class="status" disabled>
-              <option value="em andamento" ${status==="em andamento"? "selected":""}>Em andamento</option>
-              <option value="concluído" ${status==="concluído"? "selected":""}>Concluído</option>
-            </select>
-          </td>
-          <td><button class="editar-btn">✏️</button></td>
-          <td><button class="delete-btn">🗑️</button></td>
-        `;
-
-        // Eventos dos botões
-        tr.querySelector(".editar-btn").addEventListener("click", () => editar(tr));
-        tr.querySelector(".delete-btn").addEventListener("click", () => excluir(tr));
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Função para editar um poste
-    function editar(tr) {
-      tr.querySelectorAll("input, textarea, select").forEach(el => el.disabled = false);
-      const btn = tr.querySelector(".editar-btn");
-      btn.textContent = "💾";
-      btn.onclick = () => salvar(tr);
-    }
-
-    // Função para excluir um poste
-    async function excluir(tr) {
-      if (!confirm("Tem certeza que deseja excluir este poste?")) return;
-
-      const id = tr.dataset.id;
-
-      try {
-        await db.ref(`postes/${id}`).remove();
-        tr.remove();
-        alert("✅ Poste excluído com sucesso!");
-        // Recarrega a lista para atualizar o estado global
-        carregarPostes(); 
-      } catch (err) {
-        console.error(err);
-        alert(`❌ Falha ao excluir: ${err.message}`);
-      }
-    }
-
-    // Função para salvar alterações de um poste
-    async function salvar(tr) {
-      const btnSalvar = tr.querySelector(".editar-btn");
-      btnSalvar.disabled = true;
-      btnSalvar.textContent = "🔄";
-
-      const id = tr.dataset.id;
-
-      const data = {
-        dataLancamento: tr.querySelector(".dataLancamento").innerText,
-        idProjeto: tr.querySelector(".idProjeto").value.trim(),
-        codigoPoste: tr.querySelector(".codigoPoste").value.trim(),
-        postePrimario: tr.querySelector(".postePrimario").value.trim(),
-        estruturaPrimaria: tr.querySelector(".estruturaPrimaria").innerText,
-        estruturaSecundaria: tr.querySelector(".estruturaSecundaria").innerText,
-        linhaViva: tr.querySelector(".linhaViva").innerText,
-        servicosPodas: tr.querySelector(".servicosPodas").value.trim(),
-        observacoes: tr.querySelector(".observacoes").value.trim(),
-        aptaExecucao: tr.querySelector(".aptaExecucao").innerText,
-        cavaRocha: tr.querySelector(".cavaRocha").innerText,
-        lm: tr.querySelector(".lm").innerText,
-        retroescavadeira: tr.querySelector(".retroescavadeira").innerText,
-        latitude: tr.querySelector(".latitude").value.trim(),
-        longitude: tr.querySelector(".longitude").value.trim(),
-        usuario: tr.querySelector(".usuario").value.trim(),
-        vistoriador: tr.querySelector(".vistoriador").value.trim(),
-        cpfMorador: tr.querySelector(".cpfMorador").value.trim(),
-        foneMorador: tr.querySelector(".foneMorador").value.trim(),
-        luminaria: tr.querySelector(".luminaria").value.trim(),
-        fundacaoEspecial: tr.querySelector(".fundacaoEspecial").value.trim(),
-        guardRail: tr.querySelector(".guardRail").value.trim(),
-        obraLPT: tr.querySelector(".obraLPT").value.trim(),
-        monofasico: tr.querySelector(".monofasico").value.trim(),
-        bifasico: tr.querySelector(".bifasico").value.trim(),
-        trifasico: tr.querySelector(".trifasico").value.trim(),
-        possuiDesligamento: tr.querySelector(".possuiDesligamento").value.trim(),
-        quantidadeRamais: tr.querySelector(".quantidadeRamais").value.trim(),
-        status: tr.querySelector(".status").value
-      };
-
-      try {
-        await db.ref(`postes/${id}`).update(data);
-        alert("✅ Poste atualizado com sucesso!");
-        tr.querySelectorAll("input, textarea, select").forEach(el => el.disabled = true);
-        btnSalvar.textContent = "✏️";
-        btnSalvar.onclick = () => editar(tr);
-        // Recarrega a lista para atualizar o tempo decorrido no estado global
-        carregarPostes();
-      } catch (err) {
-        console.error(err);
-        alert(`❌ Falha ao salvar: ${err.message}`);
-        btnSalvar.disabled = false;
-        btnSalvar.textContent = "💾";
-      }
-    }
-
-
-    function atualizarContadorStatus() {
-      if (!Array.isArray(todosOsPostes) || todosOsPostes.length === 0) {
-        const contador = document.getElementById("contadorStatus");
-        if (contador) {
-          contador.innerText = `📚 0 projetos | 🔢 0 postes | ✅ 0 concluídos | 🛠 0 em andamento | 🕒 Atualizado: ${new Date().toLocaleTimeString("pt-BR")}`;
+        // ---------- Formatação de Data ----------
+        function formatarDataBR(dataStr) {
+            if (!dataStr) return "";
+            if (/\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}/.test(dataStr)) {
+                return dataStr;
+            }
+            const dt = new Date(dataStr);
+            if (isNaN(dt)) return dataStr;
+            const pad = n => String(n).padStart(2, "0");
+            return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`;
         }
-        return;
-      }
 
-      // ----- Funções auxiliares internas -----
-      function contarSimNao(campo, lista) {
-        let sim = 0, nao = 0;
-        lista.forEach(p => {
-          const valor = (p[campo] || "").toString().trim().toLowerCase();
-          // Lógica estrita para contar 'sim'
-          if (valor === "sim") {
-            sim++;
-          } else {
-            nao++;
-          }
+        // ---------- Carregar Postes do Firebase COM REMOÇÃO DE DUPLICATAS ----------
+        function carregarPostes() {
+            db.ref("postes").off("value");
+            db.ref("postes").on("value", snapshot => {
+                const obj = snapshot.val() || {};
+                let lista = Object.entries(obj)
+                    .filter(([, v]) => v !== null)
+                    .map(([id, data]) => {
+                        if (data.dataLancamento && typeof data.dataLancamento === "string") {
+                            const partes = data.dataLancamento.split(/[\s/:]+/).map(Number);
+                            if (partes.length >= 5) {
+                                data._dataConvertida = new Date(partes[2], partes[1]-1, partes[0], partes[3], partes[4], partes[5]||0);
+                            } else {
+                                data._dataConvertida = null;
+                            }
+                        }
+                        return { id, ...data };
+                    });
+                
+                // ORDENA do mais recente para o mais antigo
+                lista.sort((a, b) => (b._dataConvertida || 0) - (a._dataConvertida || 0));
+                
+                // 🔥 REMOVE DUPLICATAS (Projeto + Código do Poste)
+                todosOsPostes = removerPostesDuplicados(lista);
+                
+                paginaAtual = 1;
+                filtrarPostes();
+            });
+        }
+
+        // ---------- Normalização de Texto ----------
+        function normalizarTexto(txt) {
+            return (txt || "").toString().trim().toLowerCase();
+        }
+
+        // ---------- Filtrar + Calcular Tempo + Paginar + Exibir ----------
+        function filtrarPostes() {
+            const filtroProjeto = normalizarTexto(document.getElementById("filtroProjeto")?.value);
+            const filtroPoste   = normalizarTexto(document.getElementById("filtroPoste")?.value);
+            const filtroUsuario = normalizarTexto(document.getElementById("usuario")?.value);
+            const filtroStatus  = normalizarTexto(document.getElementById("filtroStatus")?.value);
+            const dataInicial   = document.getElementById("dataInicial").value;
+            const dataFinal     = document.getElementById("dataFinal").value;
+
+            let listaFiltrada = todosOsPostes.filter(p => {
+                const data = p._dataConvertida;
+                const okProjeto = !filtroProjeto || normalizarTexto(p.idProjeto).includes(filtroProjeto);
+                const okPoste   = !filtroPoste || normalizarTexto(p.codigoPoste).includes(filtroPoste);
+                const okUsuario = !filtroUsuario || normalizarTexto(p.usuario).includes(filtroUsuario);
+                const statusNorm = normalizarTexto(p.status);
+                const okStatus = !filtroStatus || (filtroStatus === "em andamento" ? (statusNorm === "" || statusNorm === "em andamento") : statusNorm === filtroStatus);
+
+                let okData = true;
+                if (dataInicial) {
+                    const dtIni = new Date(`${dataInicial}T00:00:00`);
+                    okData = data instanceof Date && data >= dtIni;
+                }
+                if (okData && dataFinal) {
+                    const dtFim = new Date(`${dataFinal}T23:59:59`);
+                    okData = data instanceof Date && data <= dtFim;
+                }
+                
+                const podasNorm = normalizarTexto(p.servicosPodas);
+                const okPodas = !mostrandoSomentePodas || podasNorm === "sim";
+                
+                return okProjeto && okPoste && okUsuario && okStatus && okData && okPodas;
+            });
+
+            listaFiltrada.forEach(p => {
+                if ((p.status || "").toLowerCase() === "em andamento") {
+                    p.tempoDecorrido = calcularTempoDecorrido(p.dataLancamento || "");
+                } else {
+                    p.tempoDecorrido = null;
+                }
+            });
+
+            listaFiltrada.sort((a, b) => (b._dataConvertida || 0) - (a._dataConvertida || 0));
+
+            const totalPaginas = Math.ceil(listaFiltrada.length / itensPorPagina);
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim    = inicio + itensPorPagina;
+            listaVisivel = listaFiltrada.slice(inicio, fim);
+
+            exibirPostes(listaVisivel);
+            mostrarMapa(listaVisivel);
+            atualizarPaginacao(totalPaginas);
+            atualizarContadorStatus();
+        }
+
+        // ---------- Atualizar Paginação ----------
+        function atualizarPaginacao(totalPaginas) {
+            const pagDiv = document.getElementById("paginacao");
+            pagDiv.innerHTML = "";
+
+            if (totalPaginas <= 1) return;
+
+            const btnAnterior = document.createElement("button");
+            btnAnterior.textContent = "« Anterior";
+            btnAnterior.disabled = paginaAtual === 1;
+            btnAnterior.classList.add("pagination-btn");
+            btnAnterior.onclick = () => {
+                paginaAtual = Math.max(1, paginaAtual - 1);
+                filtrarPostes();
+            };
+            pagDiv.appendChild(btnAnterior);
+
+            const spanStatus = document.createElement("span");
+            spanStatus.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+            spanStatus.style.margin = "0 10px";
+            spanStatus.style.fontWeight = "bold";
+            pagDiv.appendChild(spanStatus);
+            
+            const btnProxima = document.createElement("button");
+            btnProxima.textContent = "Próxima »";
+            btnProxima.disabled = paginaAtual === totalPaginas;
+            btnProxima.classList.add("pagination-btn");
+            btnProxima.onclick = () => {
+                paginaAtual = Math.min(totalPaginas, paginaAtual + 1);
+                filtrarPostes();
+            };
+            pagDiv.appendChild(btnProxima);
+        }
+
+        // ---------- Exibir Postes na Tabela ----------
+        function exibirPostes(lista) {
+            const tbody = document.querySelector("#tabelaPostes tbody");
+            tbody.innerHTML = "";
+
+            lista.forEach(p => {
+                const status = normalizarTexto(p.status || "em andamento");
+                const tempo = p.tempoDecorrido ? `${p.tempoDecorrido.dias}d ${p.tempoDecorrido.horas}h` : "-";
+
+                const tr = document.createElement("tr");
+                tr.dataset.id = p.id;
+                
+                tr.innerHTML = `
+                    <td class="dataLancamento">${p.dataLancamento || ""}</td>
+                    <td><input class="idProjeto" type="text" value="${p.idProjeto || ""}" disabled></td>
+                    <td><input class="codigoPoste" type="text" value="${p.codigoPoste || ""}" disabled></td>
+                    <td><input class="postePrimario" type="text" value="${p.postePrimario || ""}" disabled></td>
+                    <td class="estruturaPrimaria">${p.estruturaPrimaria || ""}</td>
+                    <td class="estruturaSecundaria">${p.estruturaSecundaria || ""}</td>
+                    <td class="linhaViva">${p.linhaViva || ""}</td>
+                    <td><textarea class="servicosPodas" disabled>${p.servicosPodas || ""}</textarea></td>
+                    <td><textarea class="observacoes" disabled>${p.observacoes || ""}</textarea></td>
+                    <td class="aptaExecucao">${p.aptaExecucao || ""}</td>
+                    <td class="cavaRocha">${p.cavaRocha || ""}</td>
+                    <td class="lm">${p.lm || ""}</td>
+                    <td class="retroescavadeira">${p.retroescavadeira || ""}</td>
+                    <td><input class="latitude" type="text" value="${p.latitude || ""}" disabled></td>
+                    <td><input class="longitude" type="text" value="${p.longitude || ""}" disabled></td>
+                    <td><input class="usuario" type="text" value="${p.usuario || ""}" disabled></td>
+                    <td><input class="vistoriador" type="text" value="${p.vistoriador || ""}" disabled></td>
+                    <td><input class="cpfMorador" type="text" value="${p.cpfMorador || ""}" disabled></td>
+                    <td><input class="foneMorador" type="text" value="${p.foneMorador || ""}" disabled></td>
+                    <td><input class="luminaria" type="text" value="${p.luminaria || ""}" disabled></td>
+                    <td><input class="fundacaoEspecial" type="text" value="${p.fundacaoEspecial || ""}" disabled></td>
+                    <td><input class="guardRail" type="text" value="${p.guardRail || ""}" disabled></td>
+                    <td><input class="obraLPT" type="text" value="${p.obraLPT || ""}" disabled></td>
+                    <td><input class="monofasico" type="text" value="${p.monofasico || ""}" disabled></td>
+                    <td><input class="bifasico" type="text" value="${p.bifasico || ""}" disabled></td>
+                    <td><input class="trifasico" type="text" value="${p.trifasico || ""}" disabled></td>
+                    <td><input class="possuiDesligamento" type="text" value="${p.possuiDesligamento || ""}" disabled></td>
+                    <td><input class="quantidadeRamais" type="text" value="${p.quantidadeRamais || ""}" disabled></td>
+                    <td class="tempoDecorrido"><span>${tempo}</span></td>
+                    <td>
+                        <select class="status" disabled>
+                            <option value="em andamento" ${status==="em andamento" ? "selected" : ""}>Em andamento</option>
+                            <option value="concluído" ${status==="concluído" ? "selected" : ""}>Concluído</option>
+                        </select>
+                    </td>
+                    <td><button class="editar-btn">✏️</button></td>
+                    <td><button class="delete-btn">🗑️</button></td>
+                `;
+
+                tr.querySelector(".editar-btn").addEventListener("click", () => editar(tr));
+                tr.querySelector(".delete-btn").addEventListener("click", () => excluir(tr));
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ---------- Editar Poste ----------
+        function editar(tr) {
+            tr.querySelectorAll("input, textarea, select").forEach(el => el.disabled = false);
+            const btn = tr.querySelector(".editar-btn");
+            btn.textContent = "💾";
+            btn.onclick = () => salvar(tr);
+        }
+
+        // ---------- Excluir Poste ----------
+        async function excluir(tr) {
+            if (!confirm("Tem certeza que deseja excluir este poste?")) return;
+            const id = tr.dataset.id;
+            try {
+                await db.ref(`postes/${id}`).remove();
+                tr.remove();
+                alert("✅ Poste excluído com sucesso!");
+                carregarPostes();
+            } catch (err) {
+                console.error(err);
+                alert(`❌ Falha ao excluir: ${err.message}`);
+            }
+        }
+
+        // ---------- Salvar Poste ----------
+        async function salvar(tr) {
+            const btnSalvar = tr.querySelector(".editar-btn");
+            btnSalvar.disabled = true;
+            btnSalvar.textContent = "🔄";
+
+            const id = tr.dataset.id;
+            const data = {
+                dataLancamento: tr.querySelector(".dataLancamento").innerText,
+                idProjeto: tr.querySelector(".idProjeto").value.trim(),
+                codigoPoste: tr.querySelector(".codigoPoste").value.trim(),
+                postePrimario: tr.querySelector(".postePrimario").value.trim(),
+                estruturaPrimaria: tr.querySelector(".estruturaPrimaria").innerText,
+                estruturaSecundaria: tr.querySelector(".estruturaSecundaria").innerText,
+                linhaViva: tr.querySelector(".linhaViva").innerText,
+                servicosPodas: tr.querySelector(".servicosPodas").value.trim(),
+                observacoes: tr.querySelector(".observacoes").value.trim(),
+                aptaExecucao: tr.querySelector(".aptaExecucao").innerText,
+                cavaRocha: tr.querySelector(".cavaRocha").innerText,
+                lm: tr.querySelector(".lm").innerText,
+                retroescavadeira: tr.querySelector(".retroescavadeira").innerText,
+                latitude: tr.querySelector(".latitude").value.trim(),
+                longitude: tr.querySelector(".longitude").value.trim(),
+                usuario: tr.querySelector(".usuario").value.trim(),
+                vistoriador: tr.querySelector(".vistoriador").value.trim(),
+                cpfMorador: tr.querySelector(".cpfMorador").value.trim(),
+                foneMorador: tr.querySelector(".foneMorador").value.trim(),
+                luminaria: tr.querySelector(".luminaria").value.trim(),
+                fundacaoEspecial: tr.querySelector(".fundacaoEspecial").value.trim(),
+                guardRail: tr.querySelector(".guardRail").value.trim(),
+                obraLPT: tr.querySelector(".obraLPT").value.trim(),
+                monofasico: tr.querySelector(".monofasico").value.trim(),
+                bifasico: tr.querySelector(".bifasico").value.trim(),
+                trifasico: tr.querySelector(".trifasico").value.trim(),
+                possuiDesligamento: tr.querySelector(".possuiDesligamento").value.trim(),
+                quantidadeRamais: tr.querySelector(".quantidadeRamais").value.trim(),
+                status: tr.querySelector(".status").value
+            };
+
+            try {
+                await db.ref(`postes/${id}`).update(data);
+                alert("✅ Poste atualizado com sucesso!");
+                tr.querySelectorAll("input, textarea, select").forEach(el => el.disabled = true);
+                btnSalvar.textContent = "✏️";
+                btnSalvar.onclick = () => editar(tr);
+                carregarPostes();
+            } catch (err) {
+                console.error(err);
+                alert(`❌ Falha ao salvar: ${err.message}`);
+                btnSalvar.disabled = false;
+                btnSalvar.textContent = "💾";
+            }
+        }
+
+        // ---------- Atualizar Contador de Status (COM INDICADOR DE DUPLICATAS) ----------
+        function atualizarContadorStatus() {
+            if (!Array.isArray(todosOsPostes) || todosOsPostes.length === 0) {
+                const contador = document.getElementById("contadorStatus");
+                if (contador) {
+                    contador.innerText = `📚 0 projetos | 🔢 0 postes | ✅ 0 concluídos | 🛠 0 em andamento | 🕒 Atualizado: ${new Date().toLocaleTimeString("pt-BR")}`;
+                }
+                return;
+            }
+
+            function contarSimNao(campo, lista) {
+                let sim = 0, nao = 0;
+                lista.forEach(p => {
+                    const valor = (p[campo] || "").toString().trim().toLowerCase();
+                    if (valor === "sim") sim++;
+                    else nao++;
+                });
+                return { sim, nao };
+            }
+
+            const lista = todosOsPostes;
+            const braco = contarSimNao("estruturaPrimaria", lista);
+            const poda = contarSimNao("servicosPodas", lista);
+
+            const totalProj = new Set(lista.map(p => (p.idProjeto || "").trim()).filter(x => x !== "")).size;
+            const totalPostes = lista.length;
+            const concluidos = lista.filter(p => normalizarTexto(p.status) === "concluído").length;
+            const andamento = lista.filter(p => {
+                const s = normalizarTexto(p.status);
+                return s === "" || s === "em andamento";
+            }).length;
+
+            // Conta duplicatas ocultas
+            const duplicatasOcultas = contarDuplicatasOcultas();
+
+            let msg = `📚 ${totalProj} projetos | 🔢 ${totalPostes} postes | ✅ ${concluidos} concluídos | 🛠 ${andamento} em andamento`;
+            msg += ` | Braço: Sim ${braco.sim} | Não ${braco.nao}`;
+            msg += ` | Poda faixa: Sim ${poda.sim} | Não ${poda.nao}`;
+            
+            if (duplicatasOcultas > 0) {
+                msg += ` | ⚠️ ${duplicatasOcultas} duplicada(s) oculta(s)`;
+            }
+
+            const agora = new Date();
+            const horaAtual = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+            const dataAtual = agora.toLocaleDateString("pt-BR");
+            msg += ` | 🕒 Atualizado em: ${dataAtual} às ${horaAtual}`;
+
+            const contador = document.getElementById("contadorStatus");
+            if (contador) contador.innerText = msg;
+        }
+
+        // ---------- Alternar Power BI ----------
+        function togglePowerBI() {
+            const main = document.getElementById("mainContent");
+            const powerbi = document.getElementById("powerbiContainer");
+            const btn = document.getElementById("btnPowerBI");
+
+            if (main.style.display === 'none') {
+                main.style.display = 'block';
+                powerbi.style.display = 'none';
+                btn.textContent = '📊 Power BI';
+            } else {
+                main.style.display = 'none';
+                powerbi.style.display = 'block';
+                btn.textContent = '← Voltar ao Painel';
+            }
+        }
+
+        // ---------- Alternar Mostrar Podas ----------
+        function togglePodas() {
+            mostrandoSomentePodas = !mostrandoSomentePodas;
+            document.getElementById("btnMostrarPodas").textContent = mostrandoSomentePodas ? '✅ Mostrar Todos' : '🌿 Mostrar Podas';
+            paginaAtual = 1;
+            filtrarPostes();
+        }
+
+        // ---------- Mostrar Mapa ----------
+        function mostrarMapa(lista) {
+            const bounds = new google.maps.LatLngBounds();
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 6,
+                center: { lat: -8.0, lng: -35.0 },
+                gestureHandling: "greedy",
+                zoomControl: true,
+                mapTypeControl: true,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                    position: google.maps.ControlPosition.TOP_RIGHT
+                },
+                streetViewControl: false,
+                fullscreenControl: true
+            });
+
+            markers.forEach(m => {
+                if (m.markerInstance) m.markerInstance.setMap(null);
+                if (m.intervalId) clearInterval(m.intervalId);
+            });
+            markers = [];
+
+            lista.forEach(p => {
+                const lat = parseFloat(p.latitude);
+                const lng = parseFloat(p.longitude);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                const status = (p.status || "").toLowerCase();
+                const iconPoste = status === "em andamento" || status === "" ? "andamento.png" : "poste.png";
+
+                const marcadorPoste = new google.maps.Marker({
+                    position: { lat, lng },
+                    map,
+                    title: `Poste: ${p.codigoPoste || ""}`,
+                    icon: {
+                        url: iconPoste,
+                        scaledSize: new google.maps.Size(32, 32)
+                    }
+                });
+
+                const podas = (p.servicosPodas || "").trim().toLowerCase();
+                const temPodas = (podas === "sim");
+
+                if (temPodas) {
+                    const marcadorPodas = new google.maps.Marker({
+                        position: { lat: lat + 0.000009, lng: lng + 0.000009 },
+                        map,
+                        title: `Podas: ${p.codigoPoste || ""}`,
+                        icon: {
+                            url: "abustro.png",
+                            scaledSize: new google.maps.Size(18, 18)
+                        },
+                        zIndex: google.maps.Marker.MAX_ZINDEX + 1
+                    });
+                    markers.push({ markerInstance: marcadorPodas });
+                }
+
+                let infoContent = `
+                    <div style="max-width:270px;font-family:Roboto,sans-serif;font-size:12px;color:#333">
+                        <div style="background:#004d40;color:#fff;padding:12px 16px">
+                            <div style="font-size:16px;font-weight:600">📁 Projeto: ${p.idProjeto || "N/A"}</div>
+                            <div style="font-size:13px">🔖 PG: ${p.codigoPoste || "-"}</div>
+                        </div>
+                        <div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:6px">
+                            <div>📅 <b>Vistoria:</b> ${p.dataLancamento || "-"}</div>
+                            <div>🏗️ <b>Estrutura Primária:</b> ${p.estruturaPrimaria || "-"}</div>
+                            <div>⚙️ <b>Estrutura Secundária:</b> ${p.estruturaSecundaria || "-"}</div>
+                            <div>📍 <b>Poste Primário:</b> ${p.postePrimario || "-"}</div>
+                            <div>🔗 <b>Poste Secundário:</b> ${p.posteSecundario || "-"}</div>
+                            <div>⚡ <b>Linha Viva:</b> ${p.linhaViva || "-"}</div>
+                            <div>💡 <b>Monofásico:</b> ${p.monofasico || "-"}</div>
+                            <div>💡 <b>Bifásico:</b> ${p.bifasico || "-"}</div>
+                            <div>💡 <b>Trifásico:</b> ${p.trifasico || "-"}</div>
+                            <div>🌳 <b>Serv. Podas:</b> ${p.servicosPodas || "N/A"}</div>
+                            <div>🚜 <b>Retroescavadeira:</b> ${p.retroescavadeira || "N/A"}</div>
+                            <div>🛠️ <b>Fundação Especial:</b> ${p.fundacaoEspecial || "N/A"}</div>
+                            <div>🛡️ <b>Guard Rail:</b> ${p.guardRail || "N/A"}</div>
+                            <div>🔌 <b>Desligamento:</b> ${p.possuiDesligamento || "N/A"}</div>
+                            <div>🖇️ <b>Quantidade Ramais:</b> ${p.quantidadeRamais || "-"}</div>
+                            <div>📌 <b>Ramal Selecionado:</b> ${p.ramaisSelecionados || "-"}</div>
+                            <div>🏠 <b>CPF Morador:</b> ${p.cpfMorador || "-"}</div>
+                            <div>📞 <b>Fone Morador:</b> ${p.foneMorador || "-"}</div>
+                            <div>🏗️ <b>Luminária:</b> ${p.luminaria || "-"}</div>
+                            <div>🏘️ <b>Obra LPT:</b> ${p.obraLPT || "N/A"}</div>
+                            <div>📡 <b>Lat/Lon:</b> ${p.latitude || "-"}, ${p.longitude || "-"}</div>
+                            <div>📝 <b>Obs.:</b> ${p.observacoes || "-"}</div>
+                            <div>👤 <b>Usuário:</b> ${p.usuario || "-"}</div>
+                            <div>🕵️ <b>Vistoriador:</b> ${p.vistoriador || "-"}</div>
+                            <div>🟢 <b>Status:</b> <span style="color:${status === "concluído" ? "#2e7d32" : "#ff9800"}">${p.status || "Em andamento"}</span></div>
+                        </div>
+                    </div>`;
+
+                const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+                marcadorPoste.addListener("click", () => infoWindow.open(map, marcadorPoste));
+                markers.push({ markerInstance: marcadorPoste });
+                bounds.extend({ lat, lng });
+            });
+            
+            if (lista.length > 0) {
+                map.fitBounds(bounds);
+                if (map.getZoom() > 15) map.setZoom(15);
+            }
+        }
+
+        // ---------- Event Listener de Inicialização ----------
+        document.addEventListener('DOMContentLoaded', () => {
+            window.fazerLogin = fazerLogin;
+            window.filtrarPostes = filtrarPostes;
+            window.togglePowerBI = togglePowerBI;
+            window.togglePodas = togglePodas;
+
+            atualizarContadorStatus();
+            if (document.getElementById("btnMostrarPodas")) {
+                document.getElementById("btnMostrarPodas").textContent = '🌿 Mostrar Podas';
+            }
+            window.initMap = initMap;
         });
-        return { sim, nao };
-      }
-
-      function normalizarTexto(texto) {
-        return (texto || "").toLowerCase().trim();
-      }
-
-      const lista = todosOsPostes;
-
-      // ----- Contagem Sim/Não -----
-      // Aqui usamos a contagem estrita para 'sim'
-      const braco = contarSimNao("estruturaPrimaria", lista);
-      // const lv = contarSimNao("linhaViva", lista); // REMOVIDO
-      const poda = contarSimNao("servicosPodas", lista);
-
-      // ----- Totais gerais -----
-      const totalProj = new Set(lista.map(p => (p.idProjeto || "").trim()).filter(x => x !== "")).size;
-      const totalPostes = lista.length;
-
-      const concluidos = lista.filter(p => normalizarTexto(p.status) === "concluído").length;
-      const andamento = lista.filter(p => {
-        const s = normalizarTexto(p.status);
-        return s === "" || s === "em andamento";
-      }).length;
-
-      // ----- Monta a mensagem (Linha Viva removida) -----
-      let msg = `📚 ${totalProj} projetos | 🔢 ${totalPostes} postes | ✅ ${concluidos} concluídos | 🛠 ${andamento} em andamento`;
-      msg += ` | Braço: Sim ${braco.sim} | Não ${braco.nao}`;
-      // msg += ` | Linha Viva: Sim ${lv.sim} | Não ${lv.nao}`; // REMOVIDO
-      msg += ` | Poda faixa: Sim ${poda.sim} | Não ${poda.nao}`;
-
-      const agora = new Date();
-      const horaAtual = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-      const dataAtual = agora.toLocaleDateString("pt-BR");
-      msg += ` | 🕒 Atualizado em: ${dataAtual} às ${horaAtual}`;
-
-      // ----- Exibe no HTML -----
-      const contador = document.getElementById("contadorStatus");
-      if (contador) {
-        contador.innerText = msg;
-      } else {
-        console.warn("Elemento com ID 'contadorStatus' não encontrado no HTML.");
-      }
-    }
-
-    // Função para alternar a exibição do Power BI
-    function togglePowerBI() {
-        const main = document.getElementById("mainContent");
-        const powerbi = document.getElementById("powerbiContainer");
-        const btn = document.getElementById("btnPowerBI");
-
-        if (main.style.display === 'none') {
-            main.style.display = 'block';
-            powerbi.style.display = 'none';
-            btn.textContent = '📊 Power BI';
-        } else {
-            main.style.display = 'none';
-            powerbi.style.display = 'block';
-            btn.textContent = '← Voltar ao Painel';
-        }
-    }
-
-    // Função para alternar a exibição de postes com Podas (Lógica de Linha Viva Removida)
-    function togglePodas() {
-        mostrandoSomentePodas = !mostrandoSomentePodas;
-        document.getElementById("btnMostrarPodas").textContent = mostrandoSomentePodas 
-            ? '✅ Mostrar Todos' 
-            : '🌿 Mostrar Podas';
-        
-        // A lógica de desativação mútua da Linha Viva foi removida.
-
-        paginaAtual = 1;
-        filtrarPostes(); // REAPLICA o filtro (atualiza tabela e mapa)
-    }
-
-    // FUNÇÃO toggleLinhaViva() FOI REMOVIDA COMPLETAMENTE.
-
-    // ---------- Event Listener de Inicialização (Linha Viva Removida) ----------
-    document.addEventListener('DOMContentLoaded', () => {
-        // Isso é importante para que as funções do escopo global estejam acessíveis via 'onclick'
-        window.fazerLogin = fazerLogin;
-        window.filtrarPostes = filtrarPostes;
-        window.togglePowerBI = togglePowerBI;
-        window.togglePodas = togglePodas;
-        // window.toggleLinhaViva foi removido
-
-        atualizarContadorStatus();
-        if (document.getElementById("btnMostrarPodas")) {
-            document.getElementById("btnMostrarPodas").textContent = '🌿 Mostrar Podas';
-        }
-        // O bloco 'if (document.getElementById("btnMostrarLinhaViva"))' foi removido.
-        window.initMap = initMap; // Google Maps callback
-    });
-
-
-    // ---------- Mostrar Mapa com Markers (Lógica de PODA CORRIGIDA) ----------
-    function mostrarMapa(lista, iconOverride = null) {
-      const bounds = new google.maps.LatLngBounds();
-      map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 6,
-        center: { lat: -8.0, lng: -35.0 },
-        gestureHandling: "greedy",
-        zoomControl: true,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-          style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-          position: google.maps.ControlPosition.TOP_RIGHT
-        },
-        streetViewControl: false,
-        fullscreenControl: true
-      });
-
-      const geocoder = new google.maps.Geocoder();
-
-      markers.forEach(m => {
-        if (m.markerInstance) m.markerInstance.setMap(null);
-        if (m.intervalId) clearInterval(m.intervalId);
-      });
-      markers = [];
-
-      lista.forEach(p => {
-        const lat = parseFloat(p.latitude);
-        const lng = parseFloat(p.longitude);
-        if (isNaN(lat) || isNaN(lng)) return;
-
-        const status = (p.status || "").toLowerCase();
-        const iconPoste = status === "em andamento" || status === ""
-          ? "andamento.png"
-          : "poste.png";
-
-        const marcadorPoste = new google.maps.Marker({
-          position: { lat, lng },
-          map,
-          title: `Poste: ${p.codigoPoste || ""}`,
-          icon: {
-            url: iconPoste,
-            scaledSize: new google.maps.Size(32, 32)
-          }
-        });
-
-      // LÓGICA CORRIGIDA: MOSTRA ÍCONE DE PODA APENAS SE FOR 'SIM'
-      const podas = (p.servicosPodas || "").trim().toLowerCase();
-      const temPodas = (podas === "sim"); // Apenas se o valor for exatamente "sim"
-
-      if (temPodas) {
-        const marcadorPodas = new google.maps.Marker({
-          position: { lat: lat + 0.000009, lng: lng + 0.000009 },
-          map,
-          title: `Podas: ${p.codigoPoste || ""}`,
-          icon: {
-            url: "abustro.png",
-            scaledSize: new google.maps.Size(18, 18)
-          },
-          zIndex: google.maps.Marker.MAX_ZINDEX + 1
-        });
-        markers.push({ markerInstance: marcadorPodas });
-      }
-
-
-        let infoContent = `
-      <div style="max-width:270px;font-family:Roboto,sans-serif;font-size:12px;color:#333">
-        <div style="background:#004d40;color:#fff;padding:12px 16px">
-          <div style="font-size:16px;font-weight:600">📁 Projeto: ${p.idProjeto || "N/A"}</div>
-          <div style="font-size:13px">🔖 PG: ${p.codigoPoste || "-"}</div>
-        </div>
-        <div style="padding:10px 14px;display:grid;grid-template-columns:1fr;gap:6px">
-          <div>📅 <b>Vistoria:</b> ${p.dataLancamento || "-"}</div>
-          <div>🏗️ <b>Estrutura Primária:</b> ${p.estruturaPrimaria || "-"}</div>
-          <div>⚙️ <b>Estrutura Secundária:</b> ${p.estruturaSecundaria || "-"}</div>
-          <div>📍 <b>Poste Primário:</b> ${p.postePrimario || "-"}</div>
-          <div>🔗 <b>Poste Secundário:</b> ${p.posteSecundario || "-"}</div>
-          <div>⚡ <b>Linha Viva:</b> ${p.linhaViva || "-"}</div>
-          <div>💡 <b>Monofásico:</b> ${p.monofasico || "-"}</div>
-          <div>💡 <b>Bifásico:</b> ${p.bifasico || "-"}</div>
-          <div>💡 <b>Trifásico:</b> ${p.trifasico || "-"}</div>
-          <div>🌳 <b>Serv. Podas:</b> ${p.servicosPodas || "N/A"}</div>
-          <div>🚜 <b>Retroescavadeira:</b> ${p.retroescavadeira || "N/A"}</div>
-          <div>🛠️ <b>Fundação Especial:</b> ${p.fundacaoEspecial || "N/A"}</div>
-          <div>🛡️ <b>Guard Rail:</b> ${p.guardRail || "N/A"}</div>
-          <div>🔌 <b>Desligamento:</b> ${p.possuiDesligamento || "N/A"}</div>
-          <div>🖇️ <b>Quantidade Ramais:</b> ${p.quantidadeRamais || "-"}</div>
-          <div>📌 <b>Ramal Selecionado:</b> ${p.ramaisSelecionados || "-"}</div>
-          <div>🏠 <b>CPF Morador:</b> ${p.cpfMorador || "-"}</div>
-          <div>📞 <b>Fone Morador:</b> ${p.foneMorador || "-"}</div>
-          <div>🏗️ <b>Luminária:</b> ${p.luminaria || "-"}</div>
-
-          <div>🏘️ <b>Obra LPT:</b> ${p.obraLPT || "N/A"}</div>
-          <div>📡 <b>Lat/Lon:</b> ${p.latitude || "-"}, ${p.longitude || "-"}</div>
-          <div>📝 <b>Obs.:</b> ${p.observacoes || "-"}</div>
-          <div>👤 <b>Usuário:</b> ${p.usuario || "-"}</div>
-          <div>🕵️ <b>Vistoriador:</b> ${p.vistoriador || "-"}</div>
-          <div>🟢 <b>Status:</b> <span style="color:${status === "concluído" ? "#2e7d32" : "#ff9800"}">${p.status || "Em andamento"}</span></div>
-        </div>
-      </div>`;
-
-        const infoWindow = new google.maps.InfoWindow({ content: infoContent });
-        marcadorPoste.addListener("click", () => infoWindow.open(map, marcadorPoste));
-
-        // Adiciona o marcador principal ao array
-        markers.push({ markerInstance: marcadorPoste });
-        bounds.extend({ lat, lng });
-      });
-      
-      if (lista.length > 0) {
-        map.fitBounds(bounds);
-        if (map.getZoom() > 15) {
-          map.setZoom(15);
-        }
-      }
-    }
-</script>
+    </script>
 </body>
 </html>
